@@ -1,27 +1,31 @@
 name: Compila APK Flutter
-on: [workflow_dispatch] # Ti permette di avviarlo premendo un bottone
+on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Forza l'uso di una versione specifica e stabile di Ubuntu
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: . # Ottimizza il download per evitare conflitti di Node
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin' # Cambiato in Temurin, più stabile sulle nuove macchine GitHub
           java-version: '17'
           
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true # Attiva la cache per velocizzare le prossime compilazioni
           
       - name: Installa dipendenze e Compila APK
         run: |
           flutter pub get
-          flutter build apk --debug
+          flutter build apk --debug --pub
           
       - name: Carica APK nei download
         uses: actions/upload-artifact@v4
