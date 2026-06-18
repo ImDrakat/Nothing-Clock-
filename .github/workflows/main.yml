@@ -17,15 +17,15 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # Versione esatta richiesta dal pubspec del progetto
           flutter-version: '3.22.0'
           channel: 'stable'
           cache: true
 
       - name: Esegui la Build dell App
         run: |
-          flutter upgrade
           flutter pub get
+          # Forza l'aggiornamento del pacchetto difettoso delle icone
+          flutter pub upgrade font_awesome_flutter
           flutter clean
           flutter pub get
           flutter build apk --debug
