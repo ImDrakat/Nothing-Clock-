@@ -5,34 +5,38 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      # 1. Scarica TUTTO il codice del repository senza esclusioni
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Configura Java
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           
-      # 3. Configura l'ambiente Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          # Forza l'uso di una versione precedente e compatibile di Flutter
+          flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
           
-      # 4. Scarica i pacchetti e compila l'APK di debug
-      - name: Installa dipendenze e Compila APK
+      - name: Installa dipendenze e Genera Codice
         run: |
           flutter pub get
+          # Forza la rigenerazione di tutti i file di configurazione locali
+          flutter clean
+          flutter pub get
+          # Esegue il generatore di codice se richiesto da alcune librerie del widget
+          flutter pub run build_runner build --delete-conflicting-outputs || true
+          
+      - name: Compila APK
+        run: |
           flutter build apk --debug
           
-      # 5. Salva il file generato per il download
       - name: Carica APK nei download
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
-
