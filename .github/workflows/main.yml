@@ -3,33 +3,36 @@ on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-24.04 # Forza l'uso di una versione specifica e stabile di Ubuntu
+    runs-on: ubuntu-24.04
     steps:
+      # 1. Scarica TUTTO il codice del repository senza esclusioni
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: . # Ottimizza il download per evitare conflitti di Node
 
+      # 2. Configura Java
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin' # Cambiato in Temurin, più stabile sulle nuove macchine GitHub
+          distribution: 'temurin'
           java-version: '17'
           
+      # 3. Configura l'ambiente Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true # Attiva la cache per velocizzare le prossime compilazioni
+          cache: true
           
+      # 4. Scarica i pacchetti e compila l'APK di debug
       - name: Installa dipendenze e Compila APK
         run: |
           flutter pub get
-          flutter build apk --debug --pub
+          flutter build apk --debug
           
+      # 5. Salva il file generato per il download
       - name: Carica APK nei download
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
-          
+
