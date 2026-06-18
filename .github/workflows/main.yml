@@ -17,15 +17,17 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          # Versione che soddisfa il requisito Dart SDK ^3.5.0
+          flutter-version: '3.24.0'
           channel: 'stable'
           cache: true
 
-      - name: Esegui la Build dell App
+      - name: Risoluzione conflitti e Build
         run: |
+          # Forza l'aggiornamento del pacchetto problematico direttamente nel pubspec
+          sed -i 's/font_awesome_flutter:.*/font_awesome_flutter: ^10.7.0/g' pubspec.yaml
+          
           flutter pub get
-          # Forza l'aggiornamento del pacchetto difettoso delle icone
-          flutter pub upgrade font_awesome_flutter
           flutter clean
           flutter pub get
           flutter build apk --debug
