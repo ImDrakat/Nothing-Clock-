@@ -26,11 +26,24 @@ jobs:
           # 1. Aggiorna il pacchetto delle icone nel pubspec
           sed -i 's/font_awesome_flutter:.*/font_awesome_flutter: ^10.7.0/g' pubspec.yaml
           
-          # 2. Corregge il Manifest inserendo gli strumenti di override (tools)
-          sed -i 's/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android"/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android" xmlns:tools="http:\/\/schemas.android.com\/tools"/g' android/app/src/main/AndroidManifest.xml
-          
-          # 3. Forzza l'override del ricevitore dell'allarme per risolvere il Manifest Merger
-          sed -i 's/<receiver android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"/<receiver android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver" tools:replace="android:enabled"/g' android/app/src/main/AndroidManifest.xml
+          # 2. Risolve radicalmente il problema del Manifest dicendo a Gradle di accettare l'override
+          # Iniettiamo la regola "tools:replace" direttamente nella struttura principale dell'app
+          cat << EOF > android/app/src/debug/AndroidManifest.xml
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              package="com.example.nothing_clock">
+              <application tools:replace="android:label">
+                  <receiver android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
+                      tools:replace="android:enabled"
+                      android:enabled="true"
+                      android:exported="false">
+                  </receiver>
+              </application>
+          </manifest>
+          EOF
+
+          # 3. Aggiorna compileSdkVersion a 35 come richiesto da audioplayers_android (Righe 46-52 del tuo log)
+          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/g' android/app/build.gradle
 
           # 4. Avvia la compilazione pulita
           flutter pub get
