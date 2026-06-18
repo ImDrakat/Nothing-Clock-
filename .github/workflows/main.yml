@@ -13,26 +13,19 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # Forza l'uso di una versione precedente e compatibile di Flutter
           flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
-          
-      - name: Installa dipendenze e Genera Codice
+
+      - name: Esegui la Build dell App
         run: |
           flutter pub get
-          # Forza la rigenerazione di tutti i file di configurazione locali
           flutter clean
           flutter pub get
-          # Esegue il generatore di codice se richiesto da alcune librerie del widget
-          flutter pub run build_runner build --delete-conflicting-outputs || true
-          
-      - name: Compila APK
-        run: |
           flutter build apk --debug
           
       - name: Carica APK nei download
